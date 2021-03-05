@@ -4,6 +4,7 @@ const { conexion } = require('./Sequelize');
 const producto_router = require('../routes/ProductoRouter');
 const categoria_router = require('../routes/CategoriaRouter');
 const marca_router = require('../routes/MarcaRouter');
+const usuario_router = require('../routes/UsuarioRouter');
 
 
 module.exports = class Server {
@@ -33,15 +34,16 @@ module.exports = class Server {
         this.app.get("/", (req, res) => {
             res.status(200).send('La api funciona correctamente 😎🍕');
         });
-        this.app.use('', producto_router);
         this.app.use('', categoria_router);
         this.app.use('', marca_router);
+        this.app.use('', producto_router);
+        this.app.use('', usuario_router);
     }
 
     start(){
         this.app.listen(this.puerto, ()=>{
             console.log(`El servidor esta corriendo exitosamente en el puerto ${this.puerto}`);
-            conexion.sync().then( ()=>{
+            conexion.sync({force:true}).then( ()=>{
                 console.log('Base de datos sincronizada correctamente');
             })            
         })

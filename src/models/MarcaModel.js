@@ -11,7 +11,8 @@ module.exports = marca_model = conexion => conexion.define('marcas', {
         marcaNombre: {
             type: DataTypes.STRING(45),
             field: 'marca_nombre',
-            unique: true
+            unique: true,
+            allowNull: false
         }
     },{
         tableName: 't_marca',

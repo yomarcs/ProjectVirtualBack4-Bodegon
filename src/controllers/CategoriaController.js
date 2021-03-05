@@ -3,12 +3,13 @@ const { Op } = require('sequelize');
 
 const crearCategoria = (req, res) => {
     Categoria.create(req.body,{
-        attributes: [
-            ['categoria_nombre','nombre'],
-            ['categoria_descripcion','descripcion']
-        ]
+        // attributes: [
+        //     ['categoria_id','id'],
+        //     ['categoria_estado','estado'],
+        //     ['categoria_nombre','nombre'],
+        //     ['categoria_descripcion','descripcion']
+        // ]
     }).then((nuevaCategoria)=>{
-        // console.log(nuevaCategoria);
         return res.status(201).json({
             ok: true,
             message: 'Categoria creada con éxito',
@@ -26,15 +27,25 @@ const crearCategoria = (req, res) => {
 const listarCategorias = (req, res) => {
     Categoria.findAll({
         attributes: [
+            ['categoria_id','id'],
+            ['categoria_estado','estado'],
             ['categoria_nombre','nombre'],
             ['categoria_descripcion','descripcion']
         ]
     }).then((categorias)=>{
-        return res.json({
-            ok: true,
-            message: null,
-            content: categorias
-        })
+        if(categorias.length !== 0){
+            return res.json({
+                ok: true,
+                message: null,
+                content: categorias
+            })
+        }else{
+            return res.status(404).json({
+                ok: false,
+                message: 'No se encontraron categorias para listar',
+                content: null
+            })
+        }
     }).catch((error)=>{
         return res.status(500).json({
             ok: false,
@@ -51,6 +62,8 @@ const listarCategoriaById = (req, res) => {
             categoriaId: id
         }, 
         attributes: [
+            ['categoria_id','id'],
+            ['categoria_estado','estado'],
             ['categoria_nombre','nombre'],
             ['categoria_descripcion','descripcion']
         ]
@@ -64,31 +77,32 @@ const listarCategoriaById = (req, res) => {
         }else{
             return res.status(404).json({
                 ok: false,
-                message: `No se encontro producto para listar`,
+                message: `No se encontro categoria para listar`,
                 contetnt: null
                })
             }
     }).catch((error)=>{
         return res.status(500).json({
             ok: false,
-            message: 'Error interno al lstar producto',
+            message: 'Error interno al listar producto',
             content: error
         })
     })
 }
 
-const listarCategoriaLikeNombre = async (req, res) => {
+const listarCategoriaLikeNombre = (req, res) => {
     let {nombre} = req.params;
-    try{
-        let categorias = await Categoria.findAll({
-            where: {
-                categoriaNombre: {
-                    [Op.substring]: nombre
-                }
-            }, attributes: [
-                ['categoria_nombre','nombre'],
-                ['categoria_descripcion','descripcion']]
-        });
+    Categoria.findAll({
+        where: {
+            categoriaNombre: {
+                [Op.substring]: nombre
+            }
+        }, attributes: [
+            ['categoria_id','id'],
+            ['categoria_estado','estado'],
+            ['categoria_nombre','nombre'],
+            ['categoria_descripcion','descripcion']]
+    }).then((categorias) => {
         if(categorias.length !== 0){
             return res.json({
                 ok: true,
@@ -96,19 +110,20 @@ const listarCategoriaLikeNombre = async (req, res) => {
                 content: categorias
             });
         }else{
-            return res.json({
+            return res.status(404).json({
                 ok: false,
                 message: 'No se encontro coincidencias',
                 content: null
             }); 
-        }  
-    }catch(error){
+        }
+    }).catch((error) =>{
         return res.status(500).json({
             ok: false,
-            message: 'Error interno al listar categorias',
+            message: 'Error interno al buscar coincidencias',
             content: null
         });
-    }
+    })
+    
 }
 
 const editarCategoriaById = (req, res) => {
@@ -125,6 +140,8 @@ const editarCategoriaById = (req, res) => {
                     categoriaId: id
                 },
                 attributes: [
+                    ['categoria_id','id'],
+                    ['categoria_estado','estado'],
                     ['categoria_nombre','nombre'],
                     ['categoria_descripcion','descripcion']
                 ]
@@ -137,14 +154,14 @@ const editarCategoriaById = (req, res) => {
         }else{
             return res.status(404).json({
                 ok: false,
-                message: `No se encontro categoria a editar`,  
+                message: `No se encontro categoria ha actualizar`,  
                 content: null
             });
         }
     }).catch((error)=>{
         return res.status(500).json({
              ok: false,
-             message: 'Error interno al editar categoria',
+             message: 'Error interno al actualizar categoria',
              content: error
         })
     })
@@ -166,7 +183,7 @@ const eliminarCategoriaById = (req, res) => {
         }else{
             return res.status(404).json({
                 ok: false,
-                message: `No se encontro categoria a eliminar`,
+                message: `No se encontro categoria ha eliminar`,
                 content: null
             })
         }
@@ -179,11 +196,52 @@ const eliminarCategoriaById = (req, res) => {
     })
 }
 
+const in_habilitarCategoria = (req, res) => {
+    let {id} = req.params;
+    Categoria.findByPk(id).then((categoriaEncontrada) => {
+         if(categoriaEncontrada){
+            return Categoria.update({categoriaEstado : !categoriaEncontrada.categoriaEstado},{
+                    where: {
+                        categoriaId: id
+                    },
+                    attributes: [
+                        ['categoria_id','id'],
+                        ['categoria_estado','estado'],
+                        ['categoria_nombre','nombre'],
+                        ['categoria_descripcion','descripcion']
+                    ]
+                })
+            }else{
+                res.status(404).json({
+                    ok: false,
+                    message: "Categoria no existe",
+                    content: null
+                })
+            }
+
+    }).then(()=>{
+        return Categoria.findByPk(id);
+    }).then((categoriaActualizada) => {
+        return res.status(201).json({
+            ok: true, 
+            content: categoriaActualizada.categoriaEstado?'Se habilito exitosamente':'Se inhabilito exitosamente',
+            message: 'Categoria actualizada con éxito'
+        })
+    }).catch((error) => {
+        return res.status(500).json({
+            ok: false,
+            message: 'Error interno al actualizar estado',
+            content: error
+        })
+    })
+}
+
 module.exports = {
     crearCategoria,
     listarCategorias,
     listarCategoriaById,
     listarCategoriaLikeNombre,
     editarCategoriaById,
-    eliminarCategoriaById
+    eliminarCategoriaById,
+    in_habilitarCategoria
 }

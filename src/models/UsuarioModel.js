@@ -5,20 +5,24 @@ module.exports = usuario_model = conexion => conexion.define('usuarios',{
             primaryKey: true,
             autoIncrement: true,
             type: DataTypes.INTEGER,
-            field: 'usu_id',
+            field: 'usuario_id',
             allowNull: false
-        },
-        usuarioCorreo: {
-            type: DataTypes.STRING(150),
-            field: 'usuario_correo',
-            validate: {
-                isEmail: true
-            }
         },
         usuarioNombre: {
             type: DataTypes.STRING(150),
             field: 'usuario_nombre',
-            unique: true
+            unique: true,
+            allowNull: false
+        },
+        usuarioCorreo: {
+            type: DataTypes.STRING(40),
+            field: 'usuario_correo',
+            unique: true,
+            allowNull: true,
+            validate: {
+                isEmail: true,
+                len: [10,40]
+            }
         },
         usuarioDireccion: {
             type: DataTypes.STRING(255),

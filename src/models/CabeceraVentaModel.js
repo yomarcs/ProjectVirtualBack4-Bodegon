@@ -2,31 +2,31 @@ const { DataTypes } = require('sequelize');
 const Sequelize = require('sequelize');
 
 module.exports = cabecera_venta_model = conexion => conexion.define('cabeceraVentas', {
-        cabeceraId: {
+        cabeceraVentaId: {
             primaryKey: true,
             autoIncrement: true,
             type: DataTypes.INTEGER,
-            field: 'cabecera_id',
+            field: 'cabventa_id',
             allowNull: false
         },
-        cabeceraFecha: {
+        cabeceraVentaFecha: {
             type: DataTypes.DATE,
-            field: 'cabecera_fecha',
+            field: 'cabventa_fecha',
             defaultValue: Sequelize.NOW
         },
-        cabeceraSubtotal: {
+        cabeceraVentaSubtotal: {
             type: DataTypes.DECIMAL(6,2),
-            field: 'cabecera_subtotal'
+            field: 'cabventa_subtotal'
         },
-        cabeceraIGV: {
+        cabeceraVentaIGV: {
             type: DataTypes.DECIMAL(6,2),
-            field: 'cabecera_igv'
+            field: 'cabventa_igv'
         },
-        cabeceraTotal: {
+        cabeceraVentaTotal: {
             type: DataTypes.DECIMAL(7,2),
-            field: 'cabecera_total'
+            field: 'cabventa_total'
         }
     },{
-        tableName: 't_cabecera_venta',
+        tableName: 't_cabventa',
         timestamps: false
     });

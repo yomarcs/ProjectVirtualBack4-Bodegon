@@ -1,10 +1,20 @@
-const { Producto } = require('../config/Sequelize');
+const { Producto, Categoria, Marca } = require('../config/Sequelize');
 const { Op } = require('sequelize');
 
 const crearProducto = async (req, res) => {
-    let producto = req.body;
     try{
-        let nuevoProducto = await Producto.create(producto);
+        let nuevoProducto = await Producto.create(req.body, {
+            attributes: [
+                ['producto_id','id'],
+                ['producto_nombre','nombre'],
+                ['producto_descripcion','descripcion'],
+                ['producto_precio','precio'],
+                ['producto_stock','stock'],
+                ['producto_descuento','descuento'],
+                ['producto_imagen','imagen']
+            ]
+        });
+        console.log(nuevoProducto);
         return res.status(201).json({
             ok: true,
             message: 'Producto creado con éxito',
@@ -24,19 +34,41 @@ const listarProductos = async (req, res) => {
         let productos = await Producto.findAll({
             attributes: [
             // ['nombre en BD','nombre para mostrar']
+                ['producto_id','id'],
                 ['producto_nombre','nombre'],
                 ['producto_descripcion','descripcion'],
                 ['producto_precio','precio'],
                 ['producto_stock','stock'],
                 ['producto_descuento','descuento'],
                 ['producto_imagen','imagen']
+            ],
+            include: [
+                {model: Categoria,
+                    attributes: [
+                        ['categoria_id','id'],
+                        ['categoria_nombre','nombre'],
+                        ['categoria_descripcion','descripcion']
+                    ]},
+                {model: Marca,
+                    attributes: [
+                        ['marca_id','id'],
+                        ['marca_nombre','nombre']
+                    ]}
             ]
         });
+        if(productos.length !== 0){
         return res.json({
             ok: true,
             message: null,
             content: productos
         });
+        }else{
+            return res.status(404).json({
+                ok: false,
+                message: 'No se encontraron productos para listar',
+                content: null
+            }); 
+        }
     }catch(error){
         return res.status(500).json({
             ok: false,
@@ -53,12 +85,27 @@ const listarProductoById = async (req, res) => {
             where: {
                 productoId: id,
             }, attributes: [
+                ['producto_id','id'],
                 ['producto_nombre','nombre'],
                 ['producto_descripcion','descripcion'],
                 ['producto_precio','precio'],
                 ['producto_stock','stock'],
                 ['producto_descuento','descuento'],
-                ['producto_imagen','imagen']]
+                ['producto_imagen','imagen']
+            ],
+            include: [
+                {model: Categoria,
+                    attributes: [
+                        ['categoria_id','id'],
+                        ['categoria_nombre','nombre'],
+                        ['categoria_descripcion','descripcion']
+                    ]},
+                {model: Marca,
+                    attributes: [
+                        ['marca_id','id'],
+                        ['marca_nombre','nombre']
+                    ]}
+            ]
         });
         return producto ?
         res.json({
@@ -74,7 +121,7 @@ const listarProductoById = async (req, res) => {
     }catch(error){
         return res.status(500).json({
             ok: false,
-            message: 'Error interno al listar producto por id',
+            message: 'Error interno al listar producto',
             content: error
         });
     }
@@ -89,12 +136,27 @@ const listarProductoLikeNombre = async (req, res) => {
                     [Op.substring]: nombre
                 }
             }, attributes: [
+                ['producto_id','id'],
                 ['producto_nombre','nombre'],
                 ['producto_descripcion','descripcion'],
                 ['producto_precio','precio'],
                 ['producto_stock','stock'],
                 ['producto_descuento','descuento'],
-                ['producto_imagen','imagen']]
+                ['producto_imagen','imagen']
+            ],
+            include: [
+                {model: Categoria,
+                    attributes: [
+                        ['categoria_id','id'],
+                        ['categoria_nombre','nombre'],
+                        ['categoria_descripcion','descripcion']
+                    ]},
+                {model: Marca,
+                    attributes: [
+                        ['marca_id','id'],
+                        ['marca_nombre','nombre']
+                    ]}
+            ]
         });
         if(productos.length !==0){
             return res.json({
@@ -112,7 +174,7 @@ const listarProductoLikeNombre = async (req, res) => {
         return res.status(500).json({
             ok: false,
             message: 'Error interno al listar productos',
-            content: null
+            content: error
         });
     }
 }
@@ -130,13 +192,29 @@ const editarProductoById = async (req, res) => {
             let producto = await Producto.findOne({
                 where: {
                     productoId:id
-                }, attributes: [
+                }, 
+                attributes: [
+                    ['producto_id','id'],
                     ['producto_nombre','nombre'],
                     ['producto_descripcion','descripcion'],
                     ['producto_precio','precio'],
                     ['producto_stock','stock'],
                     ['producto_descuento','descuento'],
-                    ['producto_imagen','imagen']] 
+                    ['producto_imagen','imagen']
+                ],
+                include: [
+                    {model: Categoria,
+                        attributes: [
+                            ['categoria_id','id'],
+                            ['categoria_nombre','nombre'],
+                            ['categoria_descripcion','descripcion']
+                        ]},
+                    {model: Marca,
+                        attributes: [
+                            ['marca_id','id'],
+                            ['marca_nombre','nombre']
+                        ]}
+                ] 
             });
             return res.status(201).json({
                 ok: true,
@@ -146,7 +224,7 @@ const editarProductoById = async (req, res) => {
         }else{
             return res.status(404).json({
                 ok: false,
-                message: `No se encontro producto a editar`,  
+                message: `No se encontro producto ha actualizar`,  
                 content: null
             });
         }
@@ -160,14 +238,14 @@ const editarProductoById = async (req, res) => {
 }
 
 const eliminarProductoById = async (req, res) => {
-    let {id} = req.params;
     try {
+        let {id} = req.params;
         let cantProdEliminados = await Producto.destroy({
             where: {
                 productoId: id
             }
         });
-        if(cantProdEliminados[0] !== 0){
+        if(cantProdEliminados !== 0){
             return res.json({
                 ok: true,
                 message: 'Producto eliminado con éxito',
@@ -176,7 +254,7 @@ const eliminarProductoById = async (req, res) => {
         }else{
             return res.status(404).json({
                 ok: false,
-                message: `No se encontro producto a eliminar`,
+                message: `No se encontro producto ha eliminar`,
                 content: null
             });
         }

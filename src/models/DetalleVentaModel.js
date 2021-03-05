@@ -1,26 +1,26 @@
 const { DataTypes } = require('sequelize');
 
 module.exports = detalle_venta_model = conexion => conexion.define('detalleVentas', {
-        detalleId: {
+        detalleVentaId: {
             primaryKey: true,
             autoIncrement: true,
             type: DataTypes.INTEGER,
-            field: 'detalle_id',
+            field: 'detventa_id',
             allowNull: false
         },
-        detalleCantidad: {
+        detalleVentaCantidad: {
             type: DataTypes.INTEGER,
-            field: 'detalle_cantidad'
+            field: 'detventa_cantidad'
         },
-        detallePrecio: {
+        detalleVentaPrecio: {
             type: DataTypes.DECIMAL(6,2),
-            field: 'detalle_precio'
+            field: 'detventa_precio'
         },
-        detalleTotal: {
+        detalleVentaTotal: {
             type: DataTypes.DECIMAL(7,2),
-            field: 'detalle_total'
+            field: 'detventa_total'
         }
     },{
-        tableName: 't_detalle_venta',
+        tableName: 't_detventa',
         timestamps: false
     });

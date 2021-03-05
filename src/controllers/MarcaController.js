@@ -3,7 +3,12 @@ const { Op } = require('sequelize');
 
 const crearMarca = async(req, res) => {
     try{
-        let nuevaMarca = await Marca.build(req.body).save();
+        let nuevaMarca = await Marca.create(req.body,{
+            // attributes: [
+            //     ['marca_id','id'],
+            //     ['marca_nombre','nombre']
+            // ]
+        });
         return res.status(201).json({
             ok: true,
             message: 'Marca creada con éxito',
@@ -12,7 +17,7 @@ const crearMarca = async(req, res) => {
     }catch(error){
         return res.status(500).json({
             ok: false,
-            message:'Error interno al listar marcas',
+            message:'Error interno al crear marca',
             content: error
         })
     }
@@ -26,11 +31,19 @@ const listarMarcas = async(req, res) => {
                 ['marca_nombre','nombre']
             ]
         });
-        return res.json({
-            ok: true,
-            message: null,
-            content: marcas
-        });
+        if(marcas.length !==0){
+            return res.json({
+                ok: true,
+                message: null,
+                content: marcas
+            });
+        }else{
+            return res.status(404).json({
+                ok: false,
+                message: 'No se encontraron marcas para listar',
+                content: null
+            });
+        }
     } catch (error) {
         return res.status(500).json({
             ok: false,
@@ -62,7 +75,7 @@ const listarMarcaById = async (req, res) => {
         }else{
             res.status(404).json({
             ok: false,
-            message: 'Nose encontro marca a listar',
+            message: `No se encontro marca para listar`,
             content: null
         });
         }
@@ -76,34 +89,36 @@ const listarMarcaById = async (req, res) => {
 }
 
 const listarMarcasLikeNombre = async (req, res) => {
-    let {nombre} = req.params;
     try{
+        let {nombre} = req.params;
         let marcas = await Marca.findAll({
             where: {
                 marcaNombre: {
                     [Op.substring]: nombre
                 }
-            }, attributes: [
-                ['marca_nombre','nombre']]
+            },
+            attributes: [
+                ['marca_id','id'],
+                ['marca_nombre','nombre']
+            ]
         });
-        if(marcas.length !== 0){
+        if(marcas[0] !== 0){
             return res.json({
                 ok: true,
                 message: null,
                 content: marcas
         });
         }else{
-            return res.json({
+            return res.status(404).json({
                 ok: false,
                 message: 'No se encontraron coincidencias',
                 content: null
-            }); 
-        }  
+            })}  
     }catch(error){
         return res.status(500).json({
             ok: false,
             message: 'Error interno al listar marcas',
-            content: null
+            content: error
         });
     }
 }
@@ -133,7 +148,7 @@ const editarMarcaById = async(req, res) => {
         }else{
             return res.status(404).json({
                 ok: false,
-                message: 'Nose encontro marca a listar',
+                message: 'No se encontro marca ha actualizar',
                 content: null
         })};
     }catch (error) {
@@ -158,7 +173,7 @@ const eliminarMarcaById = async(req, res) => {
         }else{
             return res.status(404).json({
                 ok: false,
-                message: 'Nose encontro marca a aliminar',
+                message: `No se encontro marca ha aliminar`,
                 content: null
             });
         }

@@ -11,15 +11,18 @@ module.exports = producto_model = conexion => conexion.define('productos', {
         productoNombre: {
             type: DataTypes.STRING(100),
             field: 'producto_nombre',
-            unique: true
+            unique: true,
+            allowNull: false
         },
         productoDescripcion: {
             type: DataTypes.STRING(255),
-            field: 'producto_descripcion'
+            field: 'producto_descripcion',
+            allowNull: false
         },
         productoPrecio: {
             type: DataTypes.DECIMAL(6,2),
             field: 'producto_precio',
+            allowNull: false,
             validate: {
                 min: 1,
                 max: 9999
@@ -27,15 +30,18 @@ module.exports = producto_model = conexion => conexion.define('productos', {
         },
         productoStock: {
             type: DataTypes.INTEGER,
-            field: 'producto_stock'
+            field: 'producto_stock',
+            allowNull: false
         },
         productoDescuento: {
             type: DataTypes.INTEGER,
-            field: 'producto_descuento'
+            field: 'producto_descuento',
+            allowNull: false
         },
         productoImagen: {
             type: DataTypes.STRING(255),
-            field: 'producto_imagen'
+            field: 'producto_imagen',
+            allowNull: false
         }
     },{
         tableName: 't_producto',
